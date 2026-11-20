@@ -1,5 +1,34 @@
 [
-  { "name": "1-cover.jpg", "query": "?shot=cover&photo=pier&caption=Sunset%20Heist", "w": 1080, "h": 1080 },
-  { "name": "2-editor.jpg", "query": "?shot=editor&photo=boulevard&caption=Boulevard%20Queen", "w": 1280, "h": 720 },
-  { "name": "3-cover.jpg", "query": "?shot=cover&photo=boulevard&caption=Boulevard%20Queen", "w": 1080, "h": 1080 }
+  {
+    "name": "1-cover.jpg",
+    "query": "?shot=cover",
+    "window": "1600x900",
+    "w": 1024,
+    "h": 576,
+    "shows": "The exported 16:9 key art (1920x1080) drawn full bleed, downscaled from the 1600x900 capture."
+  },
+  {
+    "name": "2-editor.jpg",
+    "query": "?shot=editor",
+    "window": "1440x900",
+    "w": 1280,
+    "h": 800,
+    "shows": "The full editor: eight cast plates loaded, live preview, layout and grade controls, caption fields and the three export buttons."
+  },
+  {
+    "name": "3-cover-vertical.jpg",
+    "query": "?shot=vertical",
+    "window": "960x1200",
+    "w": 768,
+    "h": 960,
+    "shows": "The 1080x1350 export drawn at 960x1200, downscaled."
+  },
+  {
+    "name": "4-cover-square.jpg",
+    "query": "?shot=square",
+    "window": "960x960",
+    "w": 960,
+    "h": 960,
+    "shows": "The 1080x1080 export drawn at 960x960."
+  }
 ]

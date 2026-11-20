@@ -1,0 +1,1 @@
+Sample cast portraits and scene plates were generated with an AI image model for this entry (Pollinations, 2026); they depict no real person. Title and script fonts are under the SIL Open Font License; their OFL texts are in licenses/.

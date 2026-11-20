@@ -1,0 +1,4 @@
+out/
+shots/
+node_modules/
+.env
