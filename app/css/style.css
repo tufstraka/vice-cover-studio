@@ -1,11 +1,5 @@
 /* Vice Cover Studio — a dark cutting-room UI: charcoal teal, gold hairlines, cream type. */
 
-@font-face { font-family: 'Anton'; src: url('../assets/fonts/Anton-Regular.ttf') format('truetype'); font-weight: 400; font-display: block; }
-@font-face { font-family: 'Bebas'; src: url('../assets/fonts/BebasNeue-Regular.ttf') format('truetype'); font-weight: 400; font-display: block; }
-@font-face { font-family: 'Archivo'; src: url('../assets/fonts/ArchivoBlack-Regular.ttf') format('truetype'); font-weight: 400; font-display: block; }
-@font-face { font-family: 'MrDafoe'; src: url('../assets/fonts/MrDafoe-Regular.ttf') format('truetype'); font-weight: 400; font-display: block; }
-@font-face { font-family: 'Kaushan'; src: url('../assets/fonts/KaushanScript-Regular.ttf') format('truetype'); font-weight: 400; font-display: block; }
-
 :root {
   --ink: #070c0e;
   --panel: #0d1416;

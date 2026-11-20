@@ -1,9 +1,15 @@
 // Image loading and the skin-tone face finder used by "focus face".
 
+import { CAST_DATA, SCENE_DATA } from '../vendor/cast-data.js';
+
 export const CAST_KEYS = ['captain', 'femme', 'mechanic', 'driver', 'lookout', 'detective', 'singer', 'boss'];
 
 export function castUrl(key) {
-  return `assets/cast/${key}.jpg`;
+  return CAST_DATA[key] || '';
+}
+
+export function sceneUrl(key) {
+  return SCENE_DATA[key] || '';
 }
 
 export function loadImage(url) {

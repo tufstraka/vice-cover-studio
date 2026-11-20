@@ -2,7 +2,7 @@
 // ?shot=cover|editor|vertical|square renders a single clean canvas for screenshots.
 
 import { defaultDoc, createStore, CAST, GRADES, roleOf, TITLES } from './state.js';
-import { createAssets, focusFace, loadImage, CAST_KEYS } from './assets.js';
+import { castUrl, createAssets, focusFace, loadImage, CAST_KEYS } from './assets.js';
 import { renderCover, renderToCanvas, layoutOf } from './render.js';
 import { buildLayout, LAYOUTS, ASPECTS } from './layouts.js';
 import { shotFor } from './shots.js';
@@ -118,7 +118,7 @@ function renderCastTray() {
     btn.dataset.key = c.key;
     btn.title = `${c.role} — click to place in panel ${String(doc.selected + 1).padStart(2, '0')}`;
     const used = doc.panels.some((p) => p.key === c.key);
-    btn.innerHTML = `<img src="assets/cast/${c.key}.jpg" alt="${c.role}" />${used ? '<em>•</em>' : ''}<span>${c.role.replace('THE ', '')}</span>`;
+    btn.innerHTML = `<img src="${castUrl(c.key)}" alt="${c.role}" />${used ? '<em>•</em>' : ''}<span>${c.role.replace('THE ', '')}</span>`;
     if (doc.panels[doc.selected]?.key === c.key) btn.classList.add('is-picked');
     btn.addEventListener('click', () => assignPhoto(c.key, 'cast'));
     tray.appendChild(btn);
