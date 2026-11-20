@@ -1,5 +1,30 @@
 [
-  { "name": "1-cover.jpg", "query": "?shot=cover&photo=pier&caption=Sunset%20Heist", "w": 1080, "h": 1080 },
-  { "name": "2-editor.jpg", "query": "?shot=editor&photo=boulevard&caption=Boulevard%20Queen", "w": 1280, "h": 720 },
-  { "name": "3-cover.jpg", "query": "?shot=cover&photo=boulevard&caption=Boulevard%20Queen", "w": 1080, "h": 1080 }
+  {
+    "name": "1-cover.jpg",
+    "query": "?shot=cover&size=1920x1080&layout=five&photos=pier,boulevard&caption=SUNSET%20HEIST&location=VICE%20CITY&palette=vice",
+    "w": 1024,
+    "h": 576,
+    "note": "Landscape 16:9 five-panel cover: the poster hero shot."
+  },
+  {
+    "name": "2-editor.jpg",
+    "query": "?shot=editor&layout=five&photos=pier,boulevard&caption=VICE%20NIGHTS&location=OCEAN%20DRIVE&palette=vice&size=1920x1080",
+    "w": 1280,
+    "h": 720,
+    "note": "The studio: photo tray, layouts, lettering, grade presets, panel crop controls and PNG exports."
+  },
+  {
+    "name": "3-cover-vertical.jpg",
+    "query": "?shot=cover&size=1080x1350&layout=triptych&photos=boulevard,pier&caption=NEON%20RUNNERS&location=SOUTH%20BEACH&palette=night",
+    "w": 768,
+    "h": 960,
+    "note": "Portrait 4:5 triptych cover in the Neon Night grade."
+  },
+  {
+    "name": "4-cover-square.jpg",
+    "query": "?shot=cover&size=1080x1080&layout=duo&photos=pier,boulevard&caption=OCEAN%20DRIVE&location=VICE%20CITY&palette=dusk&grain=1&halftone=1",
+    "w": 900,
+    "h": 900,
+    "note": "Square 1:1 duo cover in the Miami Dusk grade."
+  }
 ]

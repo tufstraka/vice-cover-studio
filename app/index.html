@@ -3,21 +3,82 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cover Snap</title>
+<title>Vice Cover Studio — multi-panel cover art</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-<main class="app">
-  <section class="controls">
-    <h1>Cover Snap</h1>
-    <p>A photo and a caption, made into a square cover.</p>
-    <label>Photo <input id="photo" type="file" accept="image/*"></label>
-    <label>Caption <input id="caption" type="text" maxlength="40" value="Sunset Heist"></label>
-    <button id="export" type="button">Export PNG 1080 x 1080</button>
-    <p id="status" role="status"></p>
-  </section>
-  <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
-</main>
+<div class="studio">
+  <aside class="sidebar">
+    <header class="brand">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <div>
+        <h1>Vice Cover <em>Studio</em></h1>
+        <p>Multi-panel poster art, graded in your browser.</p>
+      </div>
+    </header>
+
+    <section class="block" aria-labelledby="photos-title">
+      <div class="block-head"><h2 id="photos-title">Photos</h2><span id="photoCount" class="count">0</span></div>
+      <label id="drop" class="drop">
+        <strong>Drop photos here</strong>
+        <span>or click to browse · JPG / PNG · never uploaded</span>
+        <input id="file" type="file" accept="image/*" multiple>
+      </label>
+      <div id="photoList" class="photo-list" aria-live="polite"></div>
+    </section>
+
+    <section class="block" aria-labelledby="layout-title">
+      <div class="block-head"><h2 id="layout-title">Layout</h2><span id="layoutNote" class="count">1 panel</span></div>
+      <div id="layouts" class="seg" role="group" aria-label="Panel layout"></div>
+    </section>
+
+    <section class="block" aria-labelledby="text-title">
+      <div class="block-head"><h2 id="text-title">Lettering</h2></div>
+      <label class="field">Caption <input id="caption" type="text" maxlength="26" value="Sunset Heist" spellcheck="false"></label>
+      <label class="field">Location <input id="location" type="text" maxlength="20" value="Vice City" spellcheck="false"></label>
+    </section>
+
+    <section class="block" aria-labelledby="grade-title">
+      <div class="block-head"><h2 id="grade-title">Grade</h2></div>
+      <div id="palettes" class="swatches" role="group" aria-label="Colour grade"></div>
+      <div class="toggles">
+        <label class="check"><input id="grain" type="checkbox" checked><span>Film grain</span></label>
+        <label class="check"><input id="halftone" type="checkbox" checked><span>Halftone</span></label>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="panel-title">
+      <div class="block-head"><h2 id="panel-title">Panel <span id="panelIndex" class="accent">01</span></h2><button id="swap" class="link-btn" type="button">Swap photos</button></div>
+      <div id="panelPicker" class="panel-picker" role="group" aria-label="Active panel"></div>
+      <div id="photoAssign" class="assign"></div>
+      <label class="field range">Zoom <input id="zoom" type="range" min="100" max="260" value="100" step="1"><output id="zoomOut">1.0×</output></label>
+      <p class="hint">Drag inside the preview to reposition the crop. Scroll to zoom.</p>
+    </section>
+  </aside>
+
+  <main class="stage">
+    <div class="stage-bar">
+      <div class="live"><span class="dot"></span>Live preview <span id="stageInfo" class="mono">1920 × 1080</span></div>
+      <div class="aspects" role="group" aria-label="Preview shape">
+        <button type="button" data-size="square">1:1</button>
+        <button type="button" data-size="portrait">4:5</button>
+        <button type="button" data-size="wide" class="on">16:9</button>
+      </div>
+      <div class="exports" role="group" aria-label="Export PNG">
+        <button type="button" data-export="square">1080²</button>
+        <button type="button" data-export="portrait">1080×1350</button>
+        <button type="button" data-export="wide">1920×1080</button>
+      </div>
+    </div>
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="cover" width="1400" height="788" aria-label="Cover art preview"></canvas>
+    </div>
+    <div class="stage-foot">
+      <span id="status" role="status">Ready. Load a photo to start.</span>
+      <span class="foot-note">Original art, generated offline · no uploads</span>
+    </div>
+  </main>
+</div>
 <script type="module" src="./src/main.js"></script>
 </body>
 </html>

@@ -1,7 +1,11 @@
-// A tiny static server for app/ (Node 22, standard library only), so an entry can be tried
-// locally without a build step: `node serve.ts` serves app/ on http://localhost:8080.
-// It sends the MIME types an offline web app needs, refuses any path outside app/, and otherwise
-// does nothing clever: this is a development convenience, not a web server for the internet.
+// A local static server for app/ (Node 22, standard library only).
+//
+//   node serve.ts [--port 8080]
+//
+// It is a development convenience for trying the studio in desktop Chrome: it only ever serves
+// files under app/, refuses path traversal, sends the MIME types a browser needs and never talks
+// to the network itself. The app is plain static files, so any static host works too.
+
 import { createReadStream, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize, resolve, sep } from 'node:path';
@@ -30,26 +34,27 @@ const MIME: Record<string, string> = {
   '.woff': 'font/woff',
   '.ttf': 'font/ttf',
   '.otf': 'font/otf',
-  '.bin': 'application/octet-stream',
   '.wasm': 'application/wasm',
-  '.wav': 'audio/wav',
-  '.mp3': 'audio/mpeg',
-  '.ogg': 'audio/ogg',
   '.txt': 'text/plain; charset=utf-8',
 };
 
+function resolveRequest(pathname: string): string | null {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    return null;
+  }
+  if (decoded.endsWith('/')) decoded += 'index.html';
+  const file = resolve(join(root, normalize(decoded)));
+  if (file !== root && !file.startsWith(root + sep)) return null;
+  return file;
+}
+
 createServer((request, response) => {
   const url = new URL(request.url ?? '/', 'http://localhost');
-  let pathname: string;
-  try {
-    pathname = decodeURIComponent(url.pathname);
-  } catch {
-    response.writeHead(400).end('bad request');
-    return;
-  }
-  if (pathname.endsWith('/')) pathname += 'index.html';
-  const file = resolve(join(root, normalize(pathname)));
-  if (file !== root && !file.startsWith(root + sep)) {
+  const file = resolveRequest(url.pathname);
+  if (!file) {
     response.writeHead(403).end('forbidden');
     return;
   }
@@ -69,5 +74,5 @@ createServer((request, response) => {
   });
   createReadStream(file).pipe(response);
 }).listen(port, '127.0.0.1', () => {
-  console.log(`app/ is on http://localhost:${port}`);
+  console.log(`Vice Cover Studio: http://localhost:${port}`);
 });
