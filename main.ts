@@ -1,4 +1,5 @@
 // Vice Cover Studio entry point: copies app/ and screenshots/ into the output folder and writes the judge dossier.
+// Run it once with plain Node: it stages the static site plus a JSON summary for grading, then exits without hosting anything.
 // Everything renders inside the page itself: visitors drop in portraits and the studio assembles a multi-face heist-poster layout with no server round trip.
 // A working gta6-cover-art-01 entry (Node 22, standard library only): the app is this directory's app/ folder, plain
 // static files a desktop browser loads offline (app/index.html and its ES modules, no library and no network
