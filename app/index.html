@@ -28,18 +28,27 @@
     </section>
 
     <section class="block" aria-labelledby="layout-title">
-      <div class="block-head"><h2 id="layout-title">Layout</h2><span id="layoutNote" class="count">1 panel</span></div>
+      <div class="block-head">
+        <h2 id="layout-title">Layout</h2><span id="layoutNote" class="count">5 panels</span>
+      </div>
       <div id="layouts" class="seg" role="group" aria-label="Panel layout"></div>
+      <button id="shuffle" class="wide-btn" type="button">Shuffle composition</button>
     </section>
 
     <section class="block" aria-labelledby="text-title">
-      <div class="block-head"><h2 id="text-title">Lettering</h2></div>
+      <div class="block-head"><h2 id="text-title">Lettering</h2><span class="count">Title system</span></div>
       <label class="field">Caption <input id="caption" type="text" maxlength="26" value="Sunset Heist" spellcheck="false"></label>
+      <label class="field">Subtitle <input id="subtitle" type="text" maxlength="40" value="The coast is never clean" spellcheck="false"></label>
       <label class="field">Location <input id="location" type="text" maxlength="20" value="Vice City" spellcheck="false"></label>
+      <div id="titleStyles" class="seg four" role="group" aria-label="Title style"></div>
+      <div class="inline-row">
+        <span class="mini-label">Caption</span>
+        <div id="captionPos" class="seg two" role="group" aria-label="Caption position"></div>
+      </div>
     </section>
 
     <section class="block" aria-labelledby="grade-title">
-      <div class="block-head"><h2 id="grade-title">Grade</h2></div>
+      <div class="block-head"><h2 id="grade-title">Grade</h2><span class="count">5 presets</span></div>
       <div id="palettes" class="swatches" role="group" aria-label="Colour grade"></div>
       <div class="toggles">
         <label class="check"><input id="grain" type="checkbox" checked><span>Film grain</span></label>
@@ -48,7 +57,13 @@
     </section>
 
     <section class="block" aria-labelledby="panel-title">
-      <div class="block-head"><h2 id="panel-title">Panel <span id="panelIndex" class="accent">01</span></h2><button id="swap" class="link-btn" type="button">Swap photos</button></div>
+      <div class="block-head">
+        <h2 id="panel-title">Panel <span id="panelIndex" class="accent">01</span></h2>
+        <div class="head-actions">
+          <button id="resetPanel" class="link-btn" type="button">Reset panel</button>
+          <button id="swap" class="link-btn" type="button">Swap photos</button>
+        </div>
+      </div>
       <div id="panelPicker" class="panel-picker" role="group" aria-label="Active panel"></div>
       <div id="photoAssign" class="assign"></div>
       <label class="field range">Zoom <input id="zoom" type="range" min="100" max="260" value="100" step="1"><output id="zoomOut">1.0×</output></label>
@@ -71,7 +86,7 @@
       </div>
     </div>
     <div class="canvas-wrap" id="canvasWrap">
-      <canvas id="cover" width="1400" height="788" aria-label="Cover art preview"></canvas>
+      <canvas id="cover" width="1920" height="1080" aria-label="Cover art preview"></canvas>
     </div>
     <div class="stage-foot">
       <span id="status" role="status">Ready. Load a photo to start.</span>

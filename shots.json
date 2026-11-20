@@ -1,30 +1,30 @@
 [
   {
     "name": "1-cover.jpg",
-    "query": "?shot=cover&size=1920x1080&layout=five&photos=pier,boulevard&caption=SUNSET%20HEIST&location=VICE%20CITY&palette=vice",
+    "query": "?shot=cover&size=1920x1080&layout=five&photos=boulevard,pier&caption=VICE%20SUNSET&subtitle=THE%20COAST%20IS%20NEVER%20CLEAN&location=VICE%20CITY&palette=vice&style=classic&position=bottom&focus=0.5:0.18,0.55:0.16,0.62:0.22,0.85:0.45,0.18:0.62&zoom=1.08,1.05,1.45,1.7,1.35",
     "w": 1024,
     "h": 576,
-    "note": "Landscape 16:9 five-panel cover: the poster hero shot."
+    "note": "Heritage landscape 16:9 five-panel cover: hero portrait, detail crops, five-panel collage and classic lettering."
   },
   {
     "name": "2-editor.jpg",
-    "query": "?shot=editor&layout=five&photos=pier,boulevard&caption=VICE%20NIGHTS&location=OCEAN%20DRIVE&palette=vice&size=1920x1080",
+    "query": "?shot=editor&layout=quad&photos=pier,boulevard&caption=VICE%20NIGHTS&subtitle=OCEAN%20DRIVE%20AFTER%20DARK&location=SOUTH%20BEACH&palette=night&style=neon&size=1920x1080&panel=0&focus=0.5:0.2,0.5:0.25,0.5:0.5,0.5:0.4&zoom=1.05,1.05,1.2,1.05",
     "w": 1280,
     "h": 720,
-    "note": "The studio: photo tray, layouts, lettering, grade presets, panel crop controls and PNG exports."
+    "note": "The studio: photo tray, six layouts, title system, five grades, per-panel crop and PNG exports."
   },
   {
     "name": "3-cover-vertical.jpg",
-    "query": "?shot=cover&size=1080x1350&layout=triptych&photos=boulevard,pier&caption=NEON%20RUNNERS&location=SOUTH%20BEACH&palette=night",
+    "query": "?shot=cover&size=1080x1350&layout=triptych&photos=boulevard,pier&caption=NEON%20RUNNERS&subtitle=NO%20BRAKES%20ON%20THE%20CAUSEWAY&location=SOUTH%20BEACH&palette=night&style=neon&position=bottom&focus=0.5:0.2,0.55:0.18,0.6:0.22&zoom=1.05,1.1,1.45",
     "w": 768,
     "h": 960,
-    "note": "Portrait 4:5 triptych cover in the Neon Night grade."
+    "note": "Portrait 4:5 triptych cover in the Neon Night grade with neon lettering."
   },
   {
     "name": "4-cover-square.jpg",
-    "query": "?shot=cover&size=1080x1080&layout=duo&photos=pier,boulevard&caption=OCEAN%20DRIVE&location=VICE%20CITY&palette=dusk&grain=1&halftone=1",
+    "query": "?shot=cover&size=1080x1080&layout=quad&photos=boulevard,pier&caption=OCEAN%20DRIVE&subtitle=GOLDEN%20HOUR%20HEIST&location=VICE%20CITY&palette=golden&style=heist&position=bottom&focus=0.5:0.2,0.55:0.16,0.5:0.18,0.5:0.45&zoom=1.05,1.05,1.5,1.05",
     "w": 900,
     "h": 900,
-    "note": "Square 1:1 duo cover in the Miami Dusk grade."
+    "note": "Square 1:1 asymmetric quad cover in the Golden Hour grade with heist lettering."
   }
 ]

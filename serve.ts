@@ -38,6 +38,7 @@ const MIME: Record<string, string> = {
   '.txt': 'text/plain; charset=utf-8',
 };
 
+/** Maps a request path to a file inside app/, or null when it escapes the root. */
 function resolveRequest(pathname: string): string | null {
   let decoded: string;
   try {
@@ -52,6 +53,11 @@ function resolveRequest(pathname: string): string | null {
 }
 
 createServer((request, response) => {
+  const method = request.method ?? 'GET';
+  if (method !== 'GET' && method !== 'HEAD') {
+    response.writeHead(405, { allow: 'GET, HEAD' }).end('method not allowed');
+    return;
+  }
   const url = new URL(request.url ?? '/', 'http://localhost');
   const file = resolveRequest(url.pathname);
   if (!file) {
@@ -72,6 +78,10 @@ createServer((request, response) => {
     'content-length': size,
     'cache-control': 'no-store',
   });
+  if (method === 'HEAD') {
+    response.end();
+    return;
+  }
   createReadStream(file).pipe(response);
 }).listen(port, '127.0.0.1', () => {
   console.log(`Vice Cover Studio: http://localhost:${port}`);

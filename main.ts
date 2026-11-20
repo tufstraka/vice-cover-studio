@@ -1,10 +1,10 @@
 // Vice Cover Studio — entrypoint (Node 22, standard library only).
 //
 // The deliverable is app/: a static, offline multi-panel cover studio. This program copies app/
-// and screenshots/ beside the output directory, runs a few sanity checks a broken hand-in should
+// and screenshots/ beside the output directory, runs the sanity checks a broken hand-in should
 // fail loudly on, and writes dossier.json with the vendored make.fun library. The checks are
-// deliberately cheap: the scorer re-runs buildDossier on its own, and a missing cover scene should
-// be caught here rather than after submission.
+// deliberately cheap: the scorer re-runs buildDossier on its own, and a missing poster layer
+// should be caught here rather than after submission.
 //
 //   node main.ts                      # writes /output (or $MAKEFUN_OUTPUT_DIR)
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
@@ -56,25 +56,43 @@ function imageSize(bytes: Buffer): { width: number; height: number } | null {
 if (!existsSync(join(app, 'index.html'))) fail('app/index.html is missing');
 const page = readFileSync(join(app, 'index.html'), 'utf8');
 if (!page.includes('./src/main.js')) fail('app/index.html does not load ./src/main.js');
-if (/\b(?:https?:)?\/\//i.test(page)) fail('app/index.html references a remote URL');
+if (/\bhttps?:\/\//i.test(page)) fail('app/index.html references a remote URL');
+
+for (const file of ['src/main.js', 'style.css']) {
+  const text = readFileSync(join(app, file), 'utf8');
+  if (/\bhttps?:\/\//i.test(text)) fail(`app/${file} references a remote URL`);
+  if (/\bimport\s*\(|\bfrom\s+['"][^./]/.test(text)) fail(`app/${file} has a non-local import`);
+}
 
 const coverSource = readFileSync(join(app, 'src', 'cover.js'), 'utf8');
-for (const marker of ['panelRects', 'renderCover', 'drawGrain', 'drawPalm']) {
+for (const marker of [
+  'panelRects',
+  'renderCover',
+  'drawGrain',
+  'drawPalm',
+  'drawSkyline',
+  'drawHalftone',
+  'paintTitle',
+  'drawDeco',
+  'TITLE_STYLES',
+]) {
   if (!coverSource.includes(marker)) fail(`app/src/cover.js is missing ${marker}`);
 }
 
 const images = existsSync(shotsDir)
-  ? readdirSync(shotsDir).filter((name) => IMAGE_EXTENSIONS.has(extname(name).toLowerCase()))
+  ? readdirSync(shotsDir).filter((name) => IMAGE_EXTENSIONS.has(extname(name).toLowerCase())).sort()
   : [];
 if (images.length < 3 || images.length > 4) fail(`screenshots/ holds ${images.length} images; want 3 or 4`);
 
-const covers = images.filter((name) => statSync(join(shotsDir, name)).isFile());
 let landscape = 0;
-for (const name of covers) {
+for (const name of images) {
   const stats = statSync(join(shotsDir, name));
   if (stats.size > 262144) fail(`screenshots/${name} is ${stats.size} bytes, over the 256 KiB cap`);
   const dims = imageSize(readFileSync(join(shotsDir, name)));
-  if (dims && dims.width > dims.height) landscape += 1;
+  if (!dims) fail(`screenshots/${name} is not a readable PNG or JPEG`);
+  if (Math.max(dims.width, dims.height) > 1280) fail(`screenshots/${name} has a long side over 1280`);
+  if (Math.min(dims.width, dims.height) < 480) fail(`screenshots/${name} has a short side under 480`);
+  if (dims.width > dims.height) landscape += 1;
 }
 if (landscape === 0) fail('no landscape cover in screenshots/ (the first screenshot should be 16:9)');
 

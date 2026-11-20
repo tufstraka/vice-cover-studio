@@ -1,11 +1,20 @@
 // Vice Cover Studio — editor wiring.
 //
-// Holds the document state (photos, panel crops, lettering, grade), paints the live preview,
-// handles drop/browse, panel selection, pan/zoom, photo swaps and PNG export. A `?shot=`
-// query hands control to ./shots.js for deterministic screenshot scenes.
+// Holds the document state (photos, panel crops, lettering, grade, title system), paints the
+// live preview at the selected export size, handles drop/browse, panel selection, pan/zoom,
+// photo swaps, composition shuffling and PNG export. A `?shot=` query drives deterministic
+// screenshot scenes and sets window.__shotReady once the poster has painted.
 
-import { renderCover, panelRects, PALETTES, LAYOUTS, LAYOUT_LABELS, PANEL_COUNT } from './cover.js';
-import { runShot } from './shots.js';
+import {
+  renderCover,
+  panelRects,
+  PALETTES,
+  TITLE_STYLES,
+  TITLE_STYLE_LABELS,
+  LAYOUTS,
+  LAYOUT_LABELS,
+  PANEL_COUNT,
+} from './cover.js';
 
 export const SIZES = {
   square: [1080, 1080],
@@ -16,19 +25,22 @@ export const SIZES = {
 const state = {
   photos: [],
   panels: [{ photo: -1, focusX: 0.5, focusY: 0.5, zoom: 1 }],
-  layout: 'solo',
+  layout: 'five',
   caption: 'Sunset Heist',
+  subtitle: 'The coast is never clean',
   location: 'Vice City',
   palette: 'vice',
+  titleStyle: 'classic',
+  captionPosition: 'bottom',
   grain: true,
   halftone: true,
   sizeName: 'wide',
   selected: 0,
-  fullRes: false,
 };
 
 const canvas = document.getElementById('cover');
 const captionInput = document.getElementById('caption');
+const subtitleInput = document.getElementById('subtitle');
 const locationInput = document.getElementById('location');
 const statusEl = document.getElementById('status');
 const stageInfo = document.getElementById('stageInfo');
@@ -41,6 +53,8 @@ const zoomInput = document.getElementById('zoom');
 const zoomOut = document.getElementById('zoomOut');
 const layoutNote = document.getElementById('layoutNote');
 const drop = document.getElementById('drop');
+const titleStyles = document.getElementById('titleStyles');
+const captionPos = document.getElementById('captionPos');
 
 let uid = 1;
 let renderQueued = false;
@@ -56,19 +70,11 @@ export function loadImage(url) {
   });
 }
 
-function previewScale(w, h) {
-  if (state.fullRes) return 1;
-  const longest = Math.max(w, h);
-  return longest > 1280 ? 1280 / longest : 1;
-}
-
 function renderNow() {
   renderQueued = false;
   const [w, h] = SIZES[state.sizeName] ?? SIZES.wide;
-  const scale = previewScale(w, h);
-  const pw = Math.round(w * scale);
-  const ph = Math.round(h * scale);
-  renderCover(canvas, state, pw, ph);
+  // Live preview is painted at the export resolution, then fitted by CSS.
+  renderCover(canvas, state, w, h);
   stageInfo.textContent = `${w} × ${h}`;
   layoutNote.textContent = `${PANEL_COUNT[state.layout]} panel${PANEL_COUNT[state.layout] > 1 ? 's' : ''}`;
 }
@@ -79,9 +85,13 @@ function render() {
   requestAnimationFrame(renderNow);
 }
 
+function defaultPanel(index) {
+  return { photo: state.photos.length ? index % state.photos.length : -1, focusX: 0.5, focusY: 0.5, zoom: 1 };
+}
+
 function syncPanels() {
   const count = PANEL_COUNT[state.layout];
-  while (state.panels.length < count) state.panels.push({ photo: -1, focusX: 0.5, focusY: 0.5, zoom: 1 });
+  while (state.panels.length < count) state.panels.push(defaultPanel(state.panels.length));
   state.panels.length = count;
   state.panels.forEach((panel, i) => {
     if (panel.photo >= state.photos.length || panel.photo < 0) {
@@ -233,13 +243,48 @@ function buildPalettes() {
     b.className = `swatch${state.palette === id ? ' on' : ''}`;
     b.dataset.label = p.label.split(' ')[0];
     b.title = p.label;
-    b.style.background = `linear-gradient(160deg, ${p.skyTop}, ${p.skyBottom} 55%, ${p.glow})`;
+    b.style.background = `linear-gradient(160deg, ${p.skyTop}, ${p.skyMid} 48%, ${p.skyBottom} 78%, ${p.glow})`;
     b.addEventListener('click', () => {
       state.palette = id;
       buildPalettes();
       render();
     });
     wrap.append(b);
+  });
+}
+
+function buildTitleStyles() {
+  titleStyles.replaceChildren();
+  TITLE_STYLES.forEach((style) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = TITLE_STYLE_LABELS[style];
+    b.className = state.titleStyle === style ? 'on' : '';
+    b.addEventListener('click', () => {
+      state.titleStyle = style;
+      buildTitleStyles();
+      render();
+    });
+    titleStyles.append(b);
+  });
+}
+
+function buildCaptionPos() {
+  captionPos.replaceChildren();
+  [
+    ['bottom', 'Bottom'],
+    ['top', 'Top'],
+  ].forEach(([value, label]) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = label;
+    b.className = state.captionPosition === value ? 'on' : '';
+    b.addEventListener('click', () => {
+      state.captionPosition = value;
+      buildCaptionPos();
+      render();
+    });
+    captionPos.append(b);
   });
 }
 
@@ -293,19 +338,25 @@ canvas.addEventListener('pointermove', (event) => {
   render();
 });
 
-const endDrag = () => { drag = null; };
+const endDrag = () => {
+  drag = null;
+};
 canvas.addEventListener('pointerup', endDrag);
 canvas.addEventListener('pointercancel', endDrag);
 
-canvas.addEventListener('wheel', (event) => {
-  if (document.body.classList.contains('shot-cover')) return;
-  const panel = selectedPanel();
-  if (!panel) return;
-  event.preventDefault();
-  panel.zoom = Math.min(2.6, Math.max(1, panel.zoom - event.deltaY * 0.0012));
-  refreshPanelUi();
-  render();
-}, { passive: false });
+canvas.addEventListener(
+  'wheel',
+  (event) => {
+    if (document.body.classList.contains('shot-cover')) return;
+    const panel = selectedPanel();
+    if (!panel) return;
+    event.preventDefault();
+    panel.zoom = Math.min(2.6, Math.max(1, panel.zoom - event.deltaY * 0.0012));
+    refreshPanelUi();
+    render();
+  },
+  { passive: false },
+);
 
 zoomInput.addEventListener('input', () => {
   const panel = selectedPanel();
@@ -317,6 +368,10 @@ zoomInput.addEventListener('input', () => {
 
 captionInput.addEventListener('input', () => {
   state.caption = captionInput.value;
+  render();
+});
+subtitleInput.addEventListener('input', () => {
+  state.subtitle = subtitleInput.value;
   render();
 });
 locationInput.addEventListener('input', () => {
@@ -344,6 +399,37 @@ document.getElementById('swap').addEventListener('click', () => {
   statusEl.textContent = 'Rotated the photos across the panels.';
 });
 
+document.getElementById('shuffle').addEventListener('click', () => {
+  const options = LAYOUTS.filter((layout) => PANEL_COUNT[layout] <= Math.max(1, state.photos.length) || layout === state.layout);
+  state.layout = options[Math.floor(Math.random() * options.length)] ?? 'five';
+  syncPanels();
+  state.panels.forEach((panel, i) => {
+    if (state.photos.length) panel.photo = Math.floor(Math.random() * state.photos.length);
+    panel.focusX = 0.25 + Math.random() * 0.5;
+    panel.focusY = 0.3 + Math.random() * 0.4;
+    panel.zoom = 1 + Math.random() * 0.35;
+    if (panel.focusX < 0.05) panel.focusX = 0.5;
+    if (!state.photos.length) panel.photo = -1;
+    panel.index = i;
+  });
+  state.selected = 0;
+  buildLayouts();
+  refreshPanelUi();
+  render();
+  statusEl.textContent = `Shuffled to a ${LAYOUT_LABELS[state.layout].toLowerCase()} composition.`;
+});
+
+document.getElementById('resetPanel').addEventListener('click', () => {
+  const panel = selectedPanel();
+  if (!panel) return;
+  panel.focusX = 0.5;
+  panel.focusY = 0.5;
+  panel.zoom = 1;
+  refreshPanelUi();
+  render();
+  statusEl.textContent = `Panel ${String(state.selected + 1).padStart(2, '0')} reset to its centre crop.`;
+});
+
 document.querySelectorAll('.aspects button').forEach((b) => {
   b.addEventListener('click', () => setSize(b.dataset.size));
 });
@@ -355,7 +441,7 @@ document.querySelectorAll('.exports button').forEach((b) => {
 /* ---------- file input & drop ---------- */
 
 document.getElementById('file').addEventListener('change', async (event) => {
-  const files = [...event.target.files ?? []];
+  const files = [...(event.target.files ?? [])];
   event.target.value = '';
   try {
     const photos = await Promise.all(files.map(photoFromFile));
@@ -378,7 +464,9 @@ document.getElementById('file').addEventListener('change', async (event) => {
     if (type === 'drop' && event.dataTransfer?.files?.length) {
       Promise.all([...event.dataTransfer.files].filter((f) => f.type.startsWith('image/')).map(photoFromFile))
         .then(addPhotos)
-        .catch(() => { statusEl.textContent = 'One of those files could not be read as an image.'; });
+        .catch(() => {
+          statusEl.textContent = 'One of those files could not be read as an image.';
+        });
     }
   });
 });
@@ -418,11 +506,19 @@ function exportPng(sizeName) {
 
 /* ---------- deterministic screenshot scenes ---------- */
 
+function parseSize(value) {
+  if (value && SIZES[value]) return value;
+  if (value && /^\d+x\d+$/.test(value)) {
+    const [w, h] = value.split('x').map(Number);
+    const known = Object.entries(SIZES).find(([, dims]) => dims[0] === w && dims[1] === h);
+    if (known) return known[0];
+  }
+  return 'wide';
+}
+
 const shotApi = {
   async loadSamples(names) {
-    const unique = [...new Set(names)];
-    const loaded = await Promise.all(unique.map(loadSample));
-    return loaded;
+    return Promise.all([...new Set(names)].map(loadSample));
   },
   apply(scene) {
     if (scene.photos) {
@@ -431,13 +527,17 @@ const shotApi = {
     }
     if (scene.layout) state.layout = scene.layout;
     if (scene.caption != null) state.caption = scene.caption;
+    if (scene.subtitle != null) state.subtitle = scene.subtitle;
     if (scene.location != null) state.location = scene.location;
     if (scene.palette && PALETTES[scene.palette]) state.palette = scene.palette;
+    if (TITLE_STYLES.includes(scene.titleStyle)) state.titleStyle = scene.titleStyle;
+    if (scene.captionPosition === 'top' || scene.captionPosition === 'bottom') {
+      state.captionPosition = scene.captionPosition;
+    }
     if (scene.grain != null) state.grain = scene.grain;
     if (scene.halftone != null) state.halftone = scene.halftone;
     if (scene.sizeName) state.sizeName = scene.sizeName;
-    if (scene.fullRes) state.fullRes = true;
-    while (state.panels.length < PANEL_COUNT[state.layout]) state.panels.push({ photo: -1, focusX: 0.5, focusY: 0.5, zoom: 1 });
+    while (state.panels.length < PANEL_COUNT[state.layout]) state.panels.push(defaultPanel(state.panels.length));
     state.panels.length = PANEL_COUNT[state.layout];
     state.panels.forEach((panel, i) => {
       panel.photo = state.photos.length ? i % state.photos.length : -1;
@@ -448,11 +548,14 @@ const shotApi = {
       }
     });
     captionInput.value = state.caption;
+    subtitleInput.value = state.subtitle;
     locationInput.value = state.location;
     document.getElementById('grain').checked = state.grain;
     document.getElementById('halftone').checked = state.halftone;
     buildLayouts();
     buildPalettes();
+    buildTitleStyles();
+    buildCaptionPos();
     buildPhotoList();
     refreshPanelUi();
     setSize(state.sizeName);
@@ -465,9 +568,47 @@ const shotApi = {
   },
 };
 
+async function runShot(shot, query) {
+  const photoNames = (query.get('photos') || query.get('photo') || 'pier,boulevard')
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean);
+  const photos = await shotApi.loadSamples(photoNames);
+  const isEditor = shot === 'editor';
+  const caption = query.get('caption') || (isEditor ? 'Vice Nights' : 'Sunset Heist');
+  shotApi.apply({
+    photos,
+    layout: query.get('layout') || 'five',
+    caption,
+    subtitle: query.get('subtitle') || 'The coast is never clean',
+    location: query.get('location') || 'Vice City',
+    palette: query.get('palette') || 'vice',
+    titleStyle: query.get('style') || 'classic',
+    captionPosition: query.get('position') || 'bottom',
+    grain: query.get('grain') !== '0',
+    halftone: query.get('halftone') !== '0',
+    sizeName: parseSize(query.get('size')),
+    zooms: (query.get('zoom') || '').split(',').map(Number),
+    focuses: (query.get('focus') || '')
+      .split(',')
+      .filter(Boolean)
+      .map((pair) => pair.split(':').map(Number)),
+  });
+
+  document.body.classList.add(isEditor ? 'shot-editor' : 'shot-cover');
+  if (isEditor) shotApi.selectPanel(Number(query.get('panel') ?? 0));
+  shotApi.render();
+
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+  window.__shotReady = true;
+}
+
 async function boot() {
   buildLayouts();
   buildPalettes();
+  buildTitleStyles();
+  buildCaptionPos();
   buildPanelPicker();
   buildPhotoAssign();
   renderNow();
@@ -475,22 +616,21 @@ async function boot() {
   const query = new URLSearchParams(location.search);
   const shot = query.get('shot');
   if (shot) {
-    await runShot(shot, query, shotApi);
+    await runShot(shot, query);
     return;
   }
 
-  // First visit: gently peak at the sample art so the studio is never an empty frame.
+  // First visit: load the sample art so the studio is never an empty frame.
   try {
     const [pier, boulevard] = await Promise.all([loadSample('pier'), loadSample('boulevard')]);
     addPhotos([pier, boulevard]);
-    state.layout = 'triptych';
+    state.layout = 'five';
     state.sizeName = 'wide';
     syncPanels();
     buildLayouts();
     buildPanelPicker();
     buildPhotoAssign();
     setSize('wide');
-    document.querySelectorAll('.aspects button').forEach((b) => b.classList.toggle('on', b.dataset.size === 'wide'));
     statusEl.textContent = 'Sample photos loaded. Replace them with yours, then export.';
   } catch {
     statusEl.textContent = 'Ready. Load a photo to start.';
