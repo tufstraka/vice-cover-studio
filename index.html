@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vice Cover Studio — ensemble cover art</title>
+    <meta name="description" content="Build a GTA-style ensemble crime poster from your own photos: eight panels, a hero close-up, chrome lettering and three export sizes. Offline, in your browser." />
+    <link rel="stylesheet" href="vendor/fonts.css" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <!-- Shot mode (?shot=cover|editor|vertical|square) drives one of these panes; the editor is default. -->
+    <div id="shotPage" class="shot-page" hidden>
+      <div id="shotStage" class="shot-stage"><canvas id="shotCanvas" width="1920" height="1080"></canvas></div>
+      <p id="shotCaption" class="shot-caption" hidden></p>
+    </div>
+
+    <div id="app" class="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-sun" aria-hidden="true"></span>
+          <span class="brand-words">
+            <strong>VICE COVER</strong>
+            <em>STUDIO</em>
+          </span>
+        </div>
+
+        <ol class="steps" aria-label="Build steps">
+          <li class="step is-on"><b>1</b> CAST</li>
+          <li class="step"><b>2</b> CAPTION</li>
+          <li class="step"><b>3</b> EXPORT</li>
+        </ol>
+
+        <div class="topnote">
+          <span class="lock" aria-hidden="true"></span>
+          photos never leave this device
+        </div>
+      </header>
+
+      <main class="workspace">
+        <!-- ── Left column: cast, upload, layout, grade ── -->
+        <aside class="col col-left" aria-label="Cast and look">
+          <section class="block">
+            <h2 class="block-title">The cast <span class="hint">click a face to place it</span></h2>
+            <div id="castTray" class="cast-tray"></div>
+          </section>
+
+          <section class="block">
+            <h2 class="block-title">Your photos</h2>
+            <label id="dropzone" class="dropzone" for="fileInput">
+              <span class="dz-icon" aria-hidden="true"></span>
+              <span class="dz-words"><b>Drop photos</b> or browse</span>
+              <span class="dz-note">jpg, png, webp</span>
+              <input id="fileInput" type="file" accept="image/*" multiple hidden />
+            </label>
+            <div class="btn-row">
+              <button id="autoFillBtn" class="btn btn-quiet" type="button">Auto-fill</button>
+              <button id="surpriseBtn" class="btn btn-quiet" type="button">Surprise me</button>
+            </div>
+          </section>
+
+          <section class="block">
+            <h2 class="block-title">Layout</h2>
+            <div id="layoutRow" class="chip-row"></div>
+          </section>
+
+          <section class="block block-grow">
+            <h2 class="block-title">Film grade</h2>
+            <div id="gradeRow" class="grade-row"></div>
+            <p id="gradeNote" class="grade-note">Teal shadows, warm highlights, halation and grain.</p>
+          </section>
+        </aside>
+
+        <!-- ── Center: live preview ── -->
+        <section class="col col-center" aria-label="Cover preview">
+          <div class="preview-head">
+            <div id="sizeTabs" class="size-tabs" role="tablist" aria-label="Canvas size">
+              <button type="button" class="size-tab" data-aspect="1:1" role="tab">1:1 <i>1080²</i></button>
+              <button type="button" class="size-tab" data-aspect="4:5" role="tab">4:5 <i>1080×1350</i></button>
+              <button type="button" class="size-tab is-on" data-aspect="16:9" role="tab">16:9 <i>1920×1080</i></button>
+            </div>
+            <div class="preview-meta"><span id="docMeta">ENSEMBLE 8 · SUNSET</span></div>
+          </div>
+
+          <div id="stage" class="stage">
+            <canvas id="preview" width="1920" height="1080"></canvas>
+            <div id="loadingVeil" class="loading-veil">setting the table…</div>
+          </div>
+
+          <div class="panel-bar">
+            <span class="pb-label">PANEL <b id="panelIndex">03</b> · <span id="panelRole">THE MECHANIC</span></span>
+            <div class="pb-tools">
+              <button type="button" data-panel-act="prev" title="Previous photo">◀ photo</button>
+              <button type="button" data-panel-act="next" title="Next photo">photo ▶</button>
+              <button type="button" data-panel-act="flip" title="Flip horizontally">flip</button>
+              <button type="button" data-panel-act="focus" title="Find the face">focus face</button>
+              <button type="button" data-panel-act="reset" title="Reset crop">reset</button>
+            </div>
+            <span class="pb-hint">drag to pan · wheel to zoom</span>
+          </div>
+        </section>
+
+        <!-- ── Right column: captions and export ── -->
+        <aside class="col col-right" aria-label="Caption and export">
+          <section class="block">
+            <h2 class="block-title">Lettering</h2>
+            <label class="field"><span>Title</span><input id="fTitle" type="text" maxlength="42" spellcheck="false" /></label>
+            <label class="field"><span>Script subtitle</span><input id="fSubtitle" type="text" maxlength="34" spellcheck="false" /></label>
+            <label class="field"><span>Tagline</span><input id="fTagline" type="text" maxlength="60" spellcheck="false" /></label>
+            <div class="field-pair">
+              <label class="field"><span>Title font</span><select id="fTitleFont">
+                <option value="anton">Anton</option>
+                <option value="bebas">Bebas Neue</option>
+                <option value="archivo">Archivo Black</option>
+              </select></label>
+              <label class="field"><span>Script font</span><select id="fScriptFont">
+                <option value="mrdafoe">Mr Dafoe</option>
+                <option value="kaushan">Kaushan</option>
+              </select></label>
+            </div>
+          </section>
+
+          <section class="block">
+            <h2 class="block-title">Poster copy</h2>
+            <label class="field"><span>Quote</span><input id="fQuote" type="text" maxlength="60" spellcheck="false" /></label>
+            <label class="field"><span>Source</span><input id="fSource" type="text" maxlength="34" spellcheck="false" /></label>
+            <label class="field"><span>Billing</span><textarea id="fBilling" rows="3" spellcheck="false"></textarea></label>
+            <div class="field-pair">
+              <label class="field"><span>Release line</span><input id="fRelease" type="text" maxlength="22" spellcheck="false" /></label>
+              <label class="field"><span>Edition tag</span><input id="fEdition" type="text" maxlength="10" spellcheck="false" /></label>
+            </div>
+            <label class="field"><span>Seal text</span><input id="fSeal" type="text" maxlength="24" spellcheck="false" /></label>
+          </section>
+
+          <section class="block block-export">
+            <h2 class="block-title">Export PNG</h2>
+            <div class="export-grid">
+              <button type="button" class="btn btn-export" data-export="1:1">1:1<small>1080×1080</small></button>
+              <button type="button" class="btn btn-export" data-export="4:5">4:5<small>1080×1350</small></button>
+              <button type="button" class="btn btn-export" data-export="16:9">16:9<small>1920×1080</small></button>
+            </div>
+            <button id="exportAll" type="button" class="btn btn-gold">Export all 3 PNGs</button>
+            <p id="exportNote" class="export-note">Rendered here, saved to your downloads. Nothing is uploaded.</p>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="statusbar">
+        <span id="statusMsg">Ready · ensemble of eight · hero close-up</span>
+        <span class="shortcuts">⌘Z undo · ⇧⌘Z redo · drag pan · wheel zoom</span>
+      </footer>
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
